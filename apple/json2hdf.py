@@ -46,7 +46,7 @@ def main(file):
     df['sourceName'] = str(df['sourceName'])
     df['sourceVersion'] = str(df['sourceVersion'])
     df['value'] = pd.to_numeric(df['value'])
-    #df = df[df['startDate'] > "2019-12-01"]
+    df = df[df['startDate'] > "2019-12-01"]
     
     #print(df.dtypes)
     df.to_hdf(ofile,"apple")

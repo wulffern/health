@@ -38,11 +38,11 @@ weight = df["weight_kg"]
 weight.ffill(inplace=True)
 decomp = sm.tsa.seasonal_decompose(weight,model="additive")
 
-hr = pd.read_hdf("../apple/tmp/training_days.hdf")
+
 
 #- Plot stuff
 sns.set()
-fig, (ax0,ax1,ax2) = plt.subplots(nrows=3, ncols=1, constrained_layout=True,sharex=True,gridspec_kw={'height_ratios':[4,1,1]}) 
+fig, (ax0,ax1,ax2) = plt.subplots(nrows=3, ncols=1, constrained_layout=True,sharex=True,gridspec_kw={'height_ratios':[4,1,1]})
 fig.set_figheight(9)
 fig.set_figwidth(10)
 ax0.plot(weight.index,weight,c='gray')
@@ -50,14 +50,37 @@ ax0.plot(decomp.trend.index,decomp.trend,c='blue')
 ax0.set_title("Weight [kg]")
 adorne(ax0)
 
-ax1.plot(hr.index,hr,c='gray')
-ax1.set_title("Training days per week")
+ax1.plot(decomp.seasonal.index,decomp.seasonal,c='gray')
+ax1.set_title("Estimated seasonal varation [kg]")
 adorne(ax1)
-ax1.set(ylim=(0, 7))
 
-ax2.plot(decomp.seasonal.index,decomp.seasonal,c='gray')
-ax2.set_title("Estimated seasonal varation [kg]")
+
+#- Plot training
+hr = pd.read_csv("~/Dropbox/health/strava/2020-09-13/activities.csv")
+hr["date"] = pd.to_datetime(hr["Activity Date"])
+hr = hr.set_index(pd.DatetimeIndex(hr['date']))
+
+#print(pd.unique(hr["Activity Type"]))
+
+hrt = hr.resample("W-MON").sum()
+
+hrt["Duration"] = hrt["Elapsed Time"]/60/60
+
+ax2.plot(hrt.index,hrt["Duration"],c='gray')
+ax2.set_title("Training Hours per week [h]")
 adorne(ax2)
+
+hrr = hr[hr["Activity Type"] == "Run"]
+hrr = hrr.resample("W-MON").sum()
+#hrb = hr[hr["Activity Type"] == "Rock Climb"]
+
+#ax3.plot(hrr.index,hrr["Distance"],c='gray')
+#ax3.set_title("Running distance per week [km]")
+#adorne(ax3)
+
+
+#ax1.set(ylim=(0, 7))
+
 
 
 
@@ -65,8 +88,10 @@ adorne(ax2)
 add_annotation("2017-01-26","No candy, chips or chocolate",(0.4,0.99))
 add_annotation("2018-05-15","When do I rest, instead of when do I exercise?",(0.9,0.7))
 add_annotation("2019-07-05","No bread",(0.6,0.2))
-add_annotation("2019-10-01","No pasta etc",(0.85,0.5))
+add_annotation("2019-10-01","No pasta ",(0.85,0.4))
 add_annotation("2019-11-14","No meat",(0.95,0.4))
+add_annotation("2020-01-10","No snus",(0.90,0.1))
+add_annotation("2020-05-26","Meat again",(0.95,0.15))
 
 #plt.show()
 plt.savefig("weight.png")
